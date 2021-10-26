@@ -32,9 +32,9 @@ By observing the root-mean square error of percieved gaze and true gaze upon dif
 (even if someone doesn't care about the big picture problem that you started with, why should they still care about the specific work that you've produced?  Who else can use your processes and results, and how?)
 
 ### What is the value of your approach beyond this specific solution?
-This allows for the Field of Neurology and AR/VR Solutions to be incentized to try more cost effective solutions with high-accuracy. It allows for a custom 6-DOF headset that is not commercialized but can be open-sourced. 
+This allows for the Field of Neurology and AR/VR Solutions to be incentized to try more cost effective solutions with high-accuracy. It allows for a custom 6-DOF headset that is not commercialized but can be open-sourced. It is more cost effective as it explores the usage of a wide angle single camera rather an assortment of different cameras. 
 ### What is the value of this solution beyond solely solving this subproblem and getting us closer to solving the big picture problem?
-
+This solution allows for us to evaluate SOTA Monocular SLAM Methods for Usages in Eye-Tracking. Current SLAM Methods for Monocular Indoor Tracking are considered fairly accurate but have nebever been explored to evaluate the accracy of determining gaze position. 
 ## Background / related work / references
 Link to your literature review in your repo.
 
