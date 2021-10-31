@@ -22,6 +22,8 @@
 #include<algorithm>
 #include<fstream>
 #include<chrono>
+#include<future>
+#include<thread>
 
 #include<opencv2/core/core.hpp>
 
@@ -32,13 +34,25 @@ using namespace std;
 void LoadImages(const string &strImagePath, const string &strPathTimes,
                 vector<string> &vstrImages, vector<double> &vTimeStamps);
 
+int processing(int argc, char **argv, ORB_SLAM3::System *slamPtr);
+
 int main(int argc, char **argv)
-{  
+{
     if(argc < 5)
     {
         cerr << endl << "Usage: ./mono_euroc path_to_vocabulary path_to_settings path_to_sequence_folder_1 path_to_times_file_1 (path_to_image_folder_2 path_to_times_file_2 ... path_to_image_folder_N path_to_times_file_N) (trajectory_file_name)" << endl;
         return 1;
     }
+
+    // Create SLAM system. It initializes all system threads and gets ready to process frames.
+    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,true);
+    auto resultFuture = async(launch::async, processing, argc, argv, &SLAM);
+    SLAM.RunViewer();
+    return resultFuture.get();
+}
+
+int processing(int argc, char **argv, ORB_SLAM3::System *slamPtr) {
+    ORB_SLAM3::System& SLAM = *slamPtr;
 
     const int num_seq = (argc-3)/2;
     cout << "num_seq = " << num_seq << endl;
@@ -77,9 +91,6 @@ int main(int argc, char **argv)
 
     cout << endl << "-------" << endl;
     cout.precision(17);
-
-    // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR, true);
 
     for (seq = 0; seq<num_seq; seq++)
     {

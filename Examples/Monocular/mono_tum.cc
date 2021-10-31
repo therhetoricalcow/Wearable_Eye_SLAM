@@ -22,6 +22,8 @@
 #include<algorithm>
 #include<fstream>
 #include<chrono>
+#include<future>
+#include<thread>
 
 #include<opencv2/core/core.hpp>
 
@@ -32,6 +34,8 @@ using namespace std;
 void LoadImages(const string &strFile, vector<string> &vstrImageFilenames,
                 vector<double> &vTimestamps);
 
+int processing(int argc, char **argv, ORB_SLAM3::System *slamPtr);
+
 int main(int argc, char **argv)
 {
     if(argc != 4)
@@ -40,6 +44,15 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,true);
+    auto resultFuture = async(launch::async, processing, argc, argv, &SLAM);
+    SLAM.RunViewer();
+    return resultFuture.get();
+}
+
+int processing(int argc, char **argv, ORB_SLAM3::System *slamPtr) {
+    ORB_SLAM3::System& SLAM = *slamPtr;
+
     // Retrieve paths to images
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
@@ -47,9 +60,6 @@ int main(int argc, char **argv)
     LoadImages(strFile, vstrImageFilenames, vTimestamps);
 
     int nImages = vstrImageFilenames.size();
-
-    // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,true);
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;

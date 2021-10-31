@@ -19,6 +19,9 @@
 
 #include "Viewer.h"
 #include <pangolin/pangolin.h>
+#include <pangolin/display/display.h>
+#include <pangolin/display/attach.h>
+#include <pangolin/display/widgets/widgets.h>
 
 #include <mutex>
 

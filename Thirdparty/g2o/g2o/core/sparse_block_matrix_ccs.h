@@ -34,11 +34,7 @@
 #include "../../config.h"
 #include "matrix_operations.h"
 
-#ifdef _MSC_VER
 #include <unordered_map>
-#else
-#include <tr1/unordered_map>
-#endif
 
 namespace g2o {
 
@@ -209,7 +205,7 @@ namespace g2o {
   /**
    * \brief Sparse matrix which uses blocks based on hash structures
    *
-   * This class is used to construct the pattern of a sparse block matrix 
+   * This class is used to construct the pattern of a sparse block matrix
    */
   template <class MatrixType>
   class SparseBlockMatrixHashMap
@@ -223,7 +219,7 @@ namespace g2o {
       //! rows of the matrix
       int rows() const {return _rowBlockIndices.size() ? _rowBlockIndices.back() : 0;}
 
-      typedef std::tr1::unordered_map<int, MatrixType*> SparseColumn;
+      typedef std::unordered_map<int, MatrixType*> SparseColumn;
 
       SparseBlockMatrixHashMap(const std::vector<int>& rowIndices, const std::vector<int>& colIndices) :
         _rowBlockIndices(rowIndices), _colBlockIndices(colIndices)

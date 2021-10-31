@@ -24,6 +24,7 @@
 #include"MapPoint.h"
 #include"KeyFrame.h"
 #include<pangolin/pangolin.h>
+#include<pangolin/display/opengl_render_state.h>
 
 #include<mutex>
 
