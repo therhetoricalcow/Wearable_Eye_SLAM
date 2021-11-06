@@ -10,7 +10,7 @@ import time
 from threading import Thread
 
 
-class sensorData:
+class Sensor:
     def __init__(self,path):
         i2c = busio.I2C(board.SCL, board.SDA)
         self.sensor = adafruit_bno055.BNO055_I2C(i2c)
