@@ -76,12 +76,8 @@ class Camera:
                 (self.grabbed1, self.frame1) = self.stream1.read()
                 (self.grabbed2, self.frame2) = self.stream2.read()
                 (self.grabbed3, self.frame3) = self.stream3.read()
+            self.write()
 
-    #			cv2.imshow("f1",self.frame1)
-    #			cv2.imshow("f2",self.frame2)
-    #			cv2.waitKey(1)
-    #			self.videocap1.write(frame1)
-    #			self.videocap2.write(frame2)
 
     def write(self):
         print(self.j / (time.time() - self.start_))
