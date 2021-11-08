@@ -38,6 +38,7 @@ class Camera:
         self.stopped = False
         self.updateThread = None
         self.start_ = 0
+        self.toWrite = False
         while (self.grabbed1 == False or self.grabbed2 == False or self.grabbed3 == False):
             (self.grabbed1, self.frame1) = self.stream1.read()
             (self.grabbed2, self.frame2) = self.stream2.read()
@@ -49,6 +50,7 @@ class Camera:
 
     def assignVideoCaps(self, src1, src2, src3):
         print(self.frame1.shape)
+        self.toWrite = True
         self.videocap1 = cv2.VideoWriter(src1, cv2.VideoWriter_fourcc(*'XVID'), 10,
                                          (self.frame1.shape[1], self.frame1.shape[0]))
         self.videocap2 = cv2.VideoWriter(src2, cv2.VideoWriter_fourcc(*'XVID'), 10,
@@ -76,7 +78,9 @@ class Camera:
                 (self.grabbed1, self.frame1) = self.stream1.read()
                 (self.grabbed2, self.frame2) = self.stream2.read()
                 (self.grabbed3, self.frame3) = self.stream3.read()
-            self.write()
+            if self.toWrite:
+
+                self.write()
 
 
     def write(self):

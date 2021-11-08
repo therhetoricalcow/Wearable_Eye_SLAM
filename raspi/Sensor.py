@@ -11,12 +11,12 @@ from threading import Thread
 
 
 class Sensor:
-    def __init__(self,path):
+    def __init__(self):
         i2c = busio.I2C(board.SCL, board.SDA)
         self.sensor = adafruit_bno055.BNO055_I2C(i2c)
         self.updateThread = None
         self.totalData = None
-        self.path = path
+        self.toWrite = False
         self.timestamp = 0
         self.j = 1
 
@@ -28,6 +28,10 @@ class Sensor:
         self.updateThread.start()
         return self
 
+    def assignPath(self,path):
+        self.path = path
+        self.toWrite = True
+
     def update(self):
         while(self.stopped == False):
             a1,a2,a3 = self.sensor.acceleration
@@ -38,7 +42,8 @@ class Sensor:
             if self.totalData is None:
                 self.totalData = data
             elif self.totalData.shape[0] == 1000:
-                self.write()
+                if self.toWrite:
+                    self.write()
                 self.totalData = data
             else:
                 self.totalData = np.vstack((self.totalData,data))

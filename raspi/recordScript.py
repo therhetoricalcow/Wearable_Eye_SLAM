@@ -2,12 +2,12 @@ from Camera import  Camera
 from Sensor import Sensor
 
 ### FilePaths
-mainPath = r"C:\Users\avane\Desktop\Recordings\"
-cameraPath =  mainPath + "Camera\"
+mainPath = "/home/pi/Desktop/SLAM_Recordings"
+cameraPath =  mainPath + "Camera/"
 cam1 = cameraPath + "camera1.avi"
 cam2 = cameraPath + "camera2.avi"
 cam3 = cameraPath + "camera3.avi"
-sensorPath = mainPath + "Sensor\"
+sensorPath = mainPath + "Sensor/"
 
 cam = Camera()
 cam.assignVideoCaps(cam1,cam2,cam3)
