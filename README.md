@@ -1,4 +1,4 @@
-# 6-DOF Monocular SLAM-Based Wearable\\Eye-Gaze Tracker with Inertial Tracking
+# 6-DOF Monocular SLAM-Based Wearable Eye-Gaze Tracker with Inertial Tracking
 
 ### Summary:
 Wearable eye-gaze platforms allow users to track their gaze in an environment governed by an real-view camera, but does not provide depth information. By integrating monocular SLAM into wearable eye-gaze technology, we obtain 6-DOF information of the user and get features of the gaze that relate to the depth of the user's view.
