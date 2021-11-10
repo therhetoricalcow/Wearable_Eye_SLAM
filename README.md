@@ -5,7 +5,7 @@ Wearable eye-gaze platforms allow users to track their gaze in an environment go
 
 ### Splash images
 ![Figure 1](/assets/images/fig1.jpg) 
-![Figure 2](/assets/images/fig2.jpg)
+![Figure 2](/assets/images/fig2.png)
 
 ### Project git repo(s):
 [https://github.com/therhetoricalcow/Wearable_Eye_SLAM](https://github.com/therhetoricalcow/Wearable_Eye_SLAM)
