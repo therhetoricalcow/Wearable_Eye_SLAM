@@ -60,49 +60,36 @@ class Camera:
 
     def start(self):
         self.stopped = False
-        self.updateThread1 = Thread(target=self.update, args=(1))
-        self.updateThread2 = Thread(target=self.update, args=(2))
-        self.updateThread3 = Thread(target=self.update, args=(3))
+        self.updateThread = Thread(target=self.update, args=())
 
         self.start_ = time.time()
         self.j = 1
         self.updateThread1.start()
-        self.updateThread1.start()
-        self.updateThread3.start()
         return self
 
-    def update(self,num):
+    def update(self):
 
         while (self.stopped == False):
-            if num == 1:
-                (self.grabbed1, self.frame1) = self.stream1.read()
-                while(self.grabbed1==False):
-                    (self.grabbed1, self.frame1) = self.stream1.read()
-                if self.toWrite:
-                    self.write(num)
-            if num == 2:
-                (self.grabbed2, self.frame2) = self.stream2.read()
-                while(self.grabbed2==False):
-                    (self.grabbed2, self.frame2) = self.stream2.read()
-                if self.toWrite:
-                    self.write(num)
-            if num == 3:
-               (self.grabbed3, self.frame3) = self.stream3.read()
-               while (self.grabbed3 == False):
-                   (self.grabbed3, self.frame3) = self.stream3.read()
-               if self.toWrite:
-                   self.write(num)
+            (grabbed1, frame1) = self.stream1.read()
+            (grabbed2, frame2) = self.stream2.read()
+            (grabbed3, frame3) = self.stream3.read()
+            while (grabbed1 == False or grabbed2 == False or grabbed3 == False):
+                (grabbed1, frame1) = self.stream1.read()
+                (grabbed2, frame2) = self.stream2.read()
+                (grabbed3, frame3) = self.stream3.read()
+
+            self.frame1 = frame1
+            self.frame2 = frame2
+            self.frame3 = frame3
 
 
 
-    def write(self,num):
+
+    def write(self):
         print(self.j / (time.time() - self.start_))
-        if num == 1:
-            self.videocap1.write(self.frame1)
-        if num == 2:
-            self.videocap2.write(self.frame2)
-        if num == 3:
-            self.videocap3.write(self.frame3)
+        self.videocap1.write(self.frame1)
+        self.videocap2.write(self.frame2)
+        self.videocap3.write(self.frame3)
         self.j = self.j + 1
 
     def stop(self):
@@ -110,7 +97,6 @@ class Camera:
         self.videocap2.release()
         self.videocap3.release()
         self.stopped = True
-        self.updateThread1.join()
-        self.updateThread2.join()
-        self.updateThread3.join()
+        self.updateThread.join()
+
 

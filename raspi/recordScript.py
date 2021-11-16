@@ -1,5 +1,21 @@
 from Camera import  Camera
 from Sensor import Sensor
+from pynput import keyboard
+
+start = False
+stop = False
+
+def on_press(key):
+    global i
+    global start
+    global stop
+    if key == keyboard.Key.esc:
+            return False
+    if key == keyboard.Key.up:
+        start = True
+    if key == keyboard.Key.down:
+        stop = True
+
 
 ### FilePaths
 mainPath = "/home/pi/Desktop/SLAM_Recordings"
@@ -11,10 +27,15 @@ sensorPath = mainPath + "Sensor/"
 
 cam = Camera()
 cam.assignVideoCaps(cam1,cam2,cam3)
-sens = Sensor(sensorPath)
-sens.start()
 cam.start()
-k  = input("Press p to Stop")
-if (k == "p"):
-    cam.stop()
-    sens.stop()
+while start == False:
+    pass
+sens = Sensor()
+sens.assignPath(sensorPath)
+sens.start()
+while stop == False:
+    cam.write()
+
+
+cam.stop()
+sens.stop()
