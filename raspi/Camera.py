@@ -48,6 +48,9 @@ class Camera:
     def read(self):
         return self.frame1, self.frame2, self.frame3
 
+    def getStreams(self):
+        return self.stream1,self.stream2,self.stream3
+
     def assignVideoCaps(self, src1, src2, src3):
         print(self.frame1.shape)
         self.toWrite = True
@@ -90,6 +93,13 @@ class Camera:
         self.videocap1.write(self.frame1)
         self.videocap2.write(self.frame2)
         self.videocap3.write(self.frame3)
+        self.j = self.j + 1
+
+    def writeFrames(self,frame1,frame2,frame3):
+        print(self.j / (time.time() - self.start_))
+        self.videocap1.write(frame1)
+        self.videocap2.write(frame2)
+        self.videocap3.write(frame3)
         self.j = self.j + 1
 
     def stop(self):

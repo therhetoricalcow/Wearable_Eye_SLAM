@@ -47,6 +47,7 @@ class Sensor:
                 self.totalData = data
             else:
                 self.totalData = np.vstack((self.totalData,data))
+                print(self.totalData.shape)
 
     def write(self):
        recPath = self.path + str(self.j) + ".csv"
