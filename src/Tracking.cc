@@ -2362,6 +2362,7 @@ void Tracking::MonocularInitialization()
             tcw.copyTo(Tcw.rowRange(0,3).col(3));
             mCurrentFrame.SetPose(Tcw);
 
+<<<<<<< HEAD
             //CreateInitialMapMonocular();
 
             //////////////////////////////
@@ -2499,6 +2500,9 @@ void Tracking::MonocularInitialization()
             mState=OK;
 
             initID = pKFcur->mnId;
+=======
+            CreateInitialMapMonocular();
+>>>>>>> 5b875915e6c6e8fdfc8b4698d898a3ebe11648c5
 
         }
     }
