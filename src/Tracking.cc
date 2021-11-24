@@ -2362,7 +2362,143 @@ void Tracking::MonocularInitialization()
             tcw.copyTo(Tcw.rowRange(0,3).col(3));
             mCurrentFrame.SetPose(Tcw);
 
-            CreateInitialMapMonocular();
+            //CreateInitialMapMonocular();
+
+            //////////////////////////////
+
+            // Create KeyFrames
+            KeyFrame* pKFini = new KeyFrame(mInitialFrame,mpAtlas->GetCurrentMap(),mpKeyFrameDB);
+            KeyFrame* pKFcur = new KeyFrame(mCurrentFrame,mpAtlas->GetCurrentMap(),mpKeyFrameDB);
+
+            if(mSensor == System::IMU_MONOCULAR)
+                pKFini->mpImuPreintegrated = (IMU::Preintegrated*)(NULL);
+
+
+            pKFini->ComputeBoW();
+            pKFcur->ComputeBoW();
+
+            // Insert KFs in the map
+            mpAtlas->AddKeyFrame(pKFini);
+            mpAtlas->AddKeyFrame(pKFcur);
+
+            for(size_t i=0; i<mvIniMatches.size();i++)
+            {
+                if(mvIniMatches[i]<0)
+                    continue;
+
+                //Create MapPoint.
+                cv::Mat worldPos(mvIniP3D[i]);
+                MapPoint* pMP = new MapPoint(worldPos,pKFcur,mpAtlas->GetCurrentMap());
+
+                pKFini->AddMapPoint(pMP,i);
+                pKFcur->AddMapPoint(pMP,mvIniMatches[i]);
+
+                pMP->AddObservation(pKFini,i);
+                pMP->AddObservation(pKFcur,mvIniMatches[i]);
+
+                pMP->ComputeDistinctiveDescriptors();
+                pMP->UpdateNormalAndDepth();
+
+                //Fill Current Frame structure
+                mCurrentFrame.mvpMapPoints[mvIniMatches[i]] = pMP;
+                mCurrentFrame.mvbOutlier[mvIniMatches[i]] = false;
+
+                //Add to Map
+                mpAtlas->AddMapPoint(pMP);
+            }
+
+
+            // Update Connections
+            pKFini->UpdateConnections();
+            pKFcur->UpdateConnections();
+
+            std::set<MapPoint*> sMPs;
+            sMPs = pKFini->GetMapPoints();
+
+            // Bundle Adjustment
+            Verbose::PrintMess("New Map created with " + to_string(mpAtlas->MapPointsInMap()) + " points", Verbose::VERBOSITY_QUIET);
+            Optimizer::GlobalBundleAdjustemnt(mpAtlas->GetCurrentMap(),20);
+
+            pKFcur->PrintPointDistribution();
+
+            float medianDepth = pKFini->ComputeSceneMedianDepth(2);
+            float invMedianDepth;
+            if(mSensor == System::IMU_MONOCULAR)
+                invMedianDepth = 4.0f/medianDepth; // 4.0f
+            else
+                invMedianDepth = 1.0f/medianDepth;
+
+            if(medianDepth<0 || pKFcur->TrackedMapPoints(1)<50) // TODO Check, originally 100 tracks
+            {
+                Verbose::PrintMess("Wrong initialization, reseting...", Verbose::VERBOSITY_NORMAL);
+                mpSystem->ResetActiveMap();
+                return;
+            }
+
+            // Scale initial baseline
+            cv::Mat Tc2w = pKFcur->GetPose();
+            Tc2w.col(3).rowRange(0,3) = Tc2w.col(3).rowRange(0,3)*invMedianDepth;
+            pKFcur->SetPose(Tc2w);
+
+            // Scale points
+            vector<MapPoint*> vpAllMapPoints = pKFini->GetMapPointMatches();
+            for(size_t iMP=0; iMP<vpAllMapPoints.size(); iMP++)
+            {
+                if(vpAllMapPoints[iMP])
+                {
+                    MapPoint* pMP = vpAllMapPoints[iMP];
+                    pMP->SetWorldPos(pMP->GetWorldPos()*invMedianDepth);
+                    pMP->UpdateNormalAndDepth();
+                }
+            }
+
+            if (mSensor == System::IMU_MONOCULAR)
+            {
+                pKFcur->mPrevKF = pKFini;
+                pKFini->mNextKF = pKFcur;
+                pKFcur->mpImuPreintegrated = mpImuPreintegratedFromLastKF;
+
+                mpImuPreintegratedFromLastKF = new IMU::Preintegrated(pKFcur->mpImuPreintegrated->GetUpdatedBias(),pKFcur->mImuCalib);
+            }
+
+
+            mpLocalMapper->InsertKeyFrame(pKFini);
+            mpLocalMapper->InsertKeyFrame(pKFcur);
+            mpLocalMapper->mFirstTs=pKFcur->mTimeStamp;
+
+            mCurrentFrame.SetPose(pKFcur->GetPose());
+            mnLastKeyFrameId=mCurrentFrame.mnId;
+            mpLastKeyFrame = pKFcur;
+            mnLastRelocFrameId = mInitialFrame.mnId;
+
+            mvpLocalKeyFrames.push_back(pKFcur);
+            mvpLocalKeyFrames.push_back(pKFini);
+            mvpLocalMapPoints=mpAtlas->GetAllMapPoints();
+            mpReferenceKF = pKFcur;
+            mCurrentFrame.mpReferenceKF = pKFcur;
+
+            // Compute here initial velocity
+            vector<KeyFrame*> vKFs = mpAtlas->GetAllKeyFrames();
+
+            cv::Mat deltaT = vKFs.back()->GetPose()*vKFs.front()->GetPoseInverse();
+            mVelocity = cv::Mat();
+            Eigen::Vector3d phi = LogSO3(Converter::toMatrix3d(deltaT.rowRange(0,3).colRange(0,3)));
+
+
+            double aux = (mCurrentFrame.mTimeStamp-mLastFrame.mTimeStamp)/(mCurrentFrame.mTimeStamp-mInitialFrame.mTimeStamp);
+            phi *= aux;
+
+            mLastFrame = Frame(mCurrentFrame);
+
+            mpAtlas->SetReferenceMapPoints(mvpLocalMapPoints);
+
+            mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
+
+            mpAtlas->GetCurrentMap()->mvpKeyFrameOrigins.push_back(pKFini);
+
+            mState=OK;
+
+            initID = pKFcur->mnId;
 
         }
     }
