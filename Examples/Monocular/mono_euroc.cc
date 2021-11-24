@@ -163,8 +163,13 @@ int processing(int argc, char **argv, ORB_SLAM3::System *slamPtr) {
     {
         const string kf_file =  "kf_" + string(argv[argc-1]) + ".txt";
         const string f_file =  "f_" + string(argv[argc-1]) + ".txt";
+        const string map_file = "map_" + string(argv[argc-1]) + ".txt";
+        
         SLAM.SaveTrajectoryEuRoC(f_file);
         SLAM.SaveKeyFrameTrajectoryEuRoC(kf_file);
+
+        // output mappoints
+        SLAM.SaveMapPointsEuRoC(map_file);
     }
     else
     {

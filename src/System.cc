@@ -655,6 +655,28 @@ void System::SaveKeyFrameTrajectoryEuRoC(const string &filename)
     f.close();
 }
 
+void System::SaveMapPointsEuRoC(const string &filename)
+{
+    cout << endl << "Saving map points to " << filename << " ..." << endl;
+
+    ofstream f;
+    f.open(filename.c_str());
+    f << fixed;
+
+    const vector<MapPoint*> &vpMPs = mpAtlas->GetAllMapPoints();
+    cout << "vpMPs size: " << vpMPs.size() << '\n';
+    int i = 0;
+    for(vector<MapPoint*>::const_iterator lit = vpMPs.begin(),
+        lend = vpMPs.end(); lit != lend; lit++) {
+            i++;
+            ORB_SLAM3::MapPoint* pMP = *lit;
+            if (pMP->isBad()) continue;
+            cv::Mat pos = pMP->GetWorldPos();
+            f << setprecision(9) << pos.at<float>(0) << " " << pos.at<float>(1) << " " << pos.at<float>(2) << endl;
+    }
+    f.close();
+}
+
 void System::SaveTrajectoryKITTI(const string &filename)
 {
     cout << endl << "Saving camera trajectory to " << filename << " ..." << endl;
